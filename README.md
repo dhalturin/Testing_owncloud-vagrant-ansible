@@ -5,7 +5,7 @@ git clone https://github.com/dhalturin/Testing_owncloud-vagrant-ansible.git
 cd Testing_owncloud-vagrant-ansible
 ```
 
-# Steps to deploy askbot
+# Steps to deploy ownCloud
 - vagrant up
 
 # Used versions
