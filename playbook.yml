@@ -32,7 +32,7 @@
          - name: turnoff selinux
            command: setenforce 0
            become: yes
-         - get_url: url=https://download.owncloud.org/community/owncloud-10.0.2.zip dest=~/owncloud.zip
+        # - get_url: url=https://download.owncloud.org/community/owncloud-10.0.2.zip dest=~/owncloud.zip
          - unarchive:
              src: https://download.owncloud.org/community/owncloud-10.0.2.zip
              remote_src: true
