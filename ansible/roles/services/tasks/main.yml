@@ -1,7 +1,19 @@
 - block:
-     - service: name=nginx state=started enabled=true
-     - service: name=php-fpm state=started enabled=true
-     - service: name=postgresql state=started enabled=true
+    - name: set name service for php on centos
+      set_fact: "php_service='php'"
+      when:
+        - ansible_distribution == "CentOS"
+        - ansible_distribution_major_version == "7"
+
+    - name: set name service for php on ubuntu
+      set_fact: "php_service='php7.0'"
+      when:
+        - ansible_distribution == "Ubuntu"
+        - ansible_distribution_major_version == "16"
+
+    - service: name=nginx state=restarted enabled=true
+    - service: name={{ php_service }}-fpm state=restarted enabled=true
+    - service: name=postgresql state=restarted enabled=true
   rescue:
     - debug:
         msg: Role execution failed

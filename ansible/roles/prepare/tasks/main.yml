@@ -1,17 +1,8 @@
 - block:
-     - template: src=nginx.j2 dest=/etc/nginx/nginx.conf
-     - template: src=default.j2 dest=/etc/nginx/conf.d/default.conf
-     - command: openssl req -new -nodes -x509 -subj "/C=US/ST=Oregon/L=Portland/O=IT/CN=localhost" -days 3650 -keyout /etc/nginx/owncloud.key -out /etc/nginx/owncloud.crt
      - command: postgresql-setup initdb
      - name: turnoff selinux
        command: setenforce 0
        become: yes
-     - unarchive:
-         src: https://download.owncloud.org/community/owncloud-10.0.2.zip
-         remote_src: true
-         dest: /
-         owner: apache
-         group: apache
      - replace:
          path: /var/lib/pgsql/data/pg_hba.conf
          regexp: 'ident$'
@@ -27,6 +18,44 @@
          owner: apache
          group: apache
          mode: 0700
+  when:
+    - ansible_distribution == "CentOS"
+    - ansible_distribution_major_version == "7"
+  rescue:
+    - debug:
+        msg: Role execution failed
+
+- block:
+     - replace:
+         path: /etc/postgresql/9.5/main/pg_hba.conf
+         regexp: 'md5$'
+         replace: 'trust'
+         backup: yes
+  when:
+    - ansible_distribution == "Ubuntu"
+    - ansible_distribution_major_version == "16"
+  rescue:
+    - debug:
+        msg: Role execution failed
+
+- block:
+    - name: set name service for php on centos
+      set_fact: "user_group='apache'"
+      when:
+        - ansible_distribution == "CentOS"
+        - ansible_distribution_major_version == "7"
+
+    - name: set name service for php on ubuntu
+      set_fact: "user_group='www-data'"
+      when:
+        - ansible_distribution == "Ubuntu"
+        - ansible_distribution_major_version == "16"
+
+    - template: src=nginx.j2 dest=/etc/nginx/nginx.conf
+    - template: src=default.j2 dest=/etc/nginx/conf.d/default.conf
+
+    - command: openssl req -new -nodes -x509 -subj "/C=US/ST=Oregon/L=Portland/O=IT/CN=localhost" -days 3650 -keyout /etc/nginx/owncloud.key -out /etc/nginx/owncloud.crt
+    - unarchive: src=https://download.owncloud.org/community/owncloud-10.0.2.zip remote_src=true dest="/" owner={{ user_group }} group={{ user_group }}
   rescue:
     - debug:
         msg: Role execution failed
