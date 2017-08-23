@@ -1,0 +1,4 @@
+- block:
+     - service: name=nginx state=started enabled=true
+     - service: name=php-fpm state=started enabled=true
+     - service: name=postgresql state=started enabled=true

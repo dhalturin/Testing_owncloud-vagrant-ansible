@@ -1,0 +1,32 @@
+- block:
+     - template: src=nginx.j2 dest=/etc/nginx/nginx.conf
+     - template: src=default.j2 dest=/etc/nginx/conf.d/default.conf
+     - command: openssl req -new -nodes -x509 -subj "/C=US/ST=Oregon/L=Portland/O=IT/CN=localhost" -days 3650 -keyout /etc/nginx/owncloud.key -out /etc/nginx/owncloud.crt
+     #- command: postgresql-setup initdb
+     - name: turnoff selinux
+       command: setenforce 0
+       become: yes
+     - unarchive:
+         src: https://download.owncloud.org/community/owncloud-10.0.2.zip
+         remote_src: true
+         dest: /
+         owner: apache
+         group: apache
+     - replace:
+         path: /var/lib/pgsql/data/pg_hba.conf
+         regexp: 'ident$'
+         replace: 'trust'
+         backup: yes
+     - lineinfile:
+         path: /etc/selinux/config
+         regexp: '^SELINUX='
+         line: 'SELINUX=permissive'
+     - file:
+         path: /var/lib/php/session
+         state: directory
+         owner: apache
+         group: apache
+         mode: 0700
+  rescue:
+    - debug:
+        msg: Role execution failed

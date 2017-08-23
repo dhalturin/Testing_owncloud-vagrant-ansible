@@ -1,0 +1,24 @@
+- block:
+     - yum:
+        name: https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
+     - yum: name={{ item }} state=installed
+       with_items:
+         - epel-release
+         - nginx
+         - php70w-fpm
+         - php70w-cli
+         - php70w-gd
+         - php70w-mcrypt
+         - php70w-pgsql
+         - php70w-pear
+         - php70w-xml
+         - php70w-mbstring
+         - php70w-pdo
+         - php70w-json
+         - postgresql-server
+         - postgresql-contrib
+         - python-psycopg2
+         - unzip
+  rescue:
+    - debug:
+        msg: Role execution failed
